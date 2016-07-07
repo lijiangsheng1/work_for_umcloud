@@ -1,6 +1,11 @@
 # 合作伙伴与 Mirantis 非锁定验证计划 —— 第二波：Fuel 插件
 
-据最近的 OpenStack 用户调查显示，Fuel 已是极为流行的部署工具了，我们相信其中一个原因就是 Fuel 的插件机制。
+
+Fuel 的插件机制，方便第三方厂商的接入，也是 UMCloud OpenStack 和第三方合作伙伴实现为客户优雅的解决问题的重要技术手段。本文就为大家展示使用Fuel插件的验证做一明确的介绍。用户、合作伙伴都是 Fuel重要的思考和帮助的对象。
+
+---------
+
+据最近的 OpenStack 用户调查显示，Fuel 已是极为流行的部署工具了，我们相信其中一个重要的原因就是 Fuel 的插件机制。
 
 在 Fuel 6.1 的时候，Fuel 团队将插件的框架纳入 Fuel 的整体架构之中，因为团队已经意识到了让外围的贡献者扩展 Fuel 的功能且在构建的时候不需要动核心部分的重要性。为了实现这个目标，Fuel 团队重构了 Fuel 的架构。
 
@@ -71,4 +76,4 @@ Fuel 是一款开源的（作为 OpenStack 大的蓝图下的一部分），而�
 
 Mirantis 坚信我们的力量来自于整合合作伙伴！而且是我们的客户信赖我们的整合。
 
-Mirantis 验证团队已经准备好为所有的 Fuel 插件开发者提供帮助。我们会不断的完善 Fuel 插件 SDK，并会在 IRC 聊天室（服务器 Freenode，房间号 #fuel-dev）、OpenStack 的邮件列表、以及[unlocked-tech@mirantis.com](mailto:unlocked-tech@mirantis.com)邮件列表里尽可能的回答疑问，
+Mirantis 验证团队已经准备好为所有的 Fuel 插件开发者提供帮助。我们会不断的完善 Fuel 插件 SDK，并会在 IRC 聊天室（服务器 Freenode，房间号 #fuel-dev）、OpenStack 的邮件列表、以及[unlocked-tech@mirantis.com](mailto:unlocked-tech@mirantis.com)邮件列表里尽可能的回答疑问。
