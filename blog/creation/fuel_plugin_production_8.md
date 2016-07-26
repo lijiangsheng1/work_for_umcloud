@@ -272,10 +272,23 @@ InfluxDB/Grafana Fuel 插件是Fuel在安装、部署OpenStack时，可以一同
 
 ### SNMP Trap Daemon for Zabbix Fuel Plugin
 
+先来看看 Zabbix 是什么东西？这款开源的监控工具不可谓不流行，设计之初就是为监控各种网络服务而设计的，当然也可以监控一些网络的硬件。
+
+此插件是让Fuel安装了以后，能够让OpenStack 从管理网络接收 SNMP traps，并将之传送给 Zabbix。此插件没有提供任何用户能够看得到的组件。
+
+请最好和下面的插件一起使用。
+
 ### Zabbix Fuel Plugin
+
+此插件用于部署 Zabbix， Zabbix正如上面介绍的，是一款开源的企业监控和分析解决方案。使用此插件，会将 Zabbix 的用户界面安装到控制器上，以及Zabbix 的代理会部署到所有的OpenStack 节点中。且在部署完成之后，访问URL：http://<VIP>/zabbix 来对 Zabbix 进行管理。
 
 ### Ceilometer Redis Plugin
 
+此插件会由Fuel来将 Redis 和 Tooz 程序库部署到 Mirantis  OpenStack 的环境当中。环境中的控制器节点都要部署 Redis 和 Tooz 程序库。
+
+安装了此插件，就实现了协调组的机制，能够让 Ceilometer 的服务横向的进行扩展。
+
+对于 Ceilometer 服务敏感的用户，可以着重看这个问题。更多详细内容，请参考插件[文档](http://plugins.mirantis.com/docs/c/e/ceilometer-redis/ceilometer-redis-1.0-1.0.2-1.pdf)。
 
 ## 安全认证
 
@@ -295,13 +308,42 @@ InfluxDB/Grafana Fuel 插件是Fuel在安装、部署OpenStack时，可以一同
 
 ### EMC - ScaleIO Fuel 插件
 
+什么是 ScaleIO？是 EMC 的一款纯软件实现的存储区域网络实现。
+
+此插件是安装了一个叫做 ScaleIOv2.0 Plugin，可以部署和配置ScaleIO集群，可以作为 OpenStack 环境的卷的后端使用的。
+
 ### EMC - ScaleIO Fuel Plugin for Cinder
+
+我们知道 OpenStack 中的块设备的服务是 Cinder，那么 SCaleIO 想要让OpenStack来Cinder来使用的话，就得让Cinder支持。本插件就是干这个的。
+
+更多内容参考EMC 和Mirantis 合作的[架构指南](https://content.mirantis.com/rs/451-RBY-185/images/h13933-emc-mirantis-openstack-ra-final.pdf)。
 
 ### NetApp Fuel Plugin
 
+NetApp 的此插件提供让 Cinder 后端支持ONTAP和E-series存储集群。其实使用的是NetApp的统一的驱动程序，还可搭配不同的存储产品和不同的存储协议。支持以下特性：
+
+* ONTAP 集群模式，基于NFS或iSCSI数据传输协议，作为Cinder 的后端支持。
+* ONTAP 7 模式
+* E－Serives 模式，基于iSCSI数据传输协议，作为Cinder 的后端支持。
+* 多后端：支持任何的Cidner 后端，如运行在iSCSI之上的LVM，或者是Ceph。
+* 支持所有的NetApp存储的属性配置。
+
+在Fuel的界面中即可完成所有的配置。
+
+
 ### Pure Storage Fuel Plugin
 
+嗯，没错，作为Fuel的插件，让OpenStack的后端支持 Pure存储阵列，省去直接到```/etc/cinder/cinder.conf```配置。此插件就是为配置文件提供图形化到配置信息，让用户可以直接在Fuel图形界面下设置Pure存储阵列到信息。
+
+至于Pure 存储是什么，恐怕读者得移步这里：[官方资源](http://www.purestorage.com/resources.html)
+
 ### SolidFire Fuel Plugin
+
+关于 SolidFire和Mirantis的合作，或者叫做最佳实践，请阅读[此架构参考](https://content.mirantis.com/rs/451-RBY-185/images/SolidfireMirantisUnlockedReferenceArchitecture-4-25-2016.pdf)。
+
+关于Solidefire，Solidefire 集群是所有的盘均使用SSD的，数据传输协议使用 iSCSI，能够提供高性能、高扩展、高容错的存储解决方案。Solidefire 集群的一个关键的特性是针对卷设置和修改特定的 QoS 级别，Solidefire 集群完全的发挥了 SSD 的全部优点的架构，如重复数据删除、压缩。
+
+SolidFire Fuel 插件提供了图形界面下配置 Cinder 的功能，其实SolidFire本身在社区就有很好的支持，可以参考：[OpenStack文档](http://docs.openstack.org/kilo/config-reference/content/solidfire-volume-driver.html)
 
 ### SwiftStack Fuel Plugin
 
