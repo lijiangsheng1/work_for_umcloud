@@ -63,18 +63,43 @@ OpenStack 的其中一个“杀手级的功能”，就是能够在一个单一�
 
 ## 准备好将 RHEL 部署到 MOS 环境中
 
+一旦用户您将红帽企业级 Linux 安装到您的服务器当中，仅需要简单的几个步骤就可以准备好将之加入到 MOS的部署中，您可以从[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#introduction)获得详细的操作，我们这里提供一个概要：
 
-
+1. 可以通过公钥访问到系统中，可以是root用户，也可以是具有执行sudo的用户。
+2. 为RHEL配置添加mos-8.0的仓库地址，并倒入仓库密钥。
+3. 启用额外的红帽仓库，以安装OpenStack的相关依赖。
+4. 为虚拟机的迁移生成公钥。
+5. 拷贝 Ceph 的 ssh 密钥到 RHEL 计算节点。（如果您使用Ceph的话）
+6. 安装 Puppet 3.x 和 Ruby 2.1.x
+7. 验证 KVM 模块启用所需的依赖。
+8. 从 Mirantis 仓库安装 fuel-library8.0 （这里就是有着神奇魔力的puppet），使用下面命令来安装：
 ```
 yum install fuel-library8.0 -y
 
 ```
+[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#introduction)中涵盖了每个步骤的命令细节。
+
+接下来，需要做的就是配置 SELinux。
 
 ## 为 RHEL 节点配置 SELinux
 
+安全增强Linux，是一种Linux 内核的安全机制，其实现了强制访问控制（MAC）。因为 RHEL 的默认配置是将SELinux 以"enforcing"模式开启的，所以我们需要配置SELinux，不让它将OpenStack的服务给屏蔽掉。否则的话，你的系统将没法工作。
+
+我们可以将SELinux配置为下面三种模式的其中一种：
+
+* **Custom permissive** - 此模式是所有OpenStack环境的首选。SELinux 通过授权以及禁止不安全的操作来管理系统的安全。您必须配置SELinux，从而让OpenStack的服务能够被操作。
+* **Permissive** - 启用 SELinux，且允许所有操作，但是所有的操作都会被记录到```/var/log/avc.log```中。
+* **Disabled** - 关闭内核的SELinux，可以执行所有的操作。
+
+请仔细阅读[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#introduction)以获得配置 SELinux 的详细步骤。
+
 ## 在 MOS 中部署 RHEL 节点
 
+现在，您已经准备好了 RHEL 节点了。是时间执行真正的部署操作了。这个过程有如下几个步骤。
+
 ### 配置 astute.yaml
+
+
 
 ### 在 RHEL 节点中应用 puppet manifests
 
@@ -103,6 +128,17 @@ RHEL 计算节点的部署流程，可以归结为在RHEL的节点上以特定�
 
 
 ## 验证部署好的 RHEL 节点
+
+现在，您已经完成了部署，所以是时候该检验一下刚刚安装好的 RHEL节点是否是正常工作的了。因为 Fuel 不能做到管理 RHEL 计算节点，所以这些节点也没法使用健康检查这项 Fuel 的功能。不过，我们针对下面场景为您提供了一些工具来进行验证：（实际的操作使用，请参考[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#introduction)）
+
+| 验证 | 需求 | 
+| ------------ | ------------- | 
+|验证OpenStack的服务 |   | 
+| |   | 
+| |   | 
+| |   | 
+| |   | 
+
 
 ## 根据负载调度分离 RHEL 节点
 
