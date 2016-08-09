@@ -99,7 +99,13 @@ yum install fuel-library8.0 -y
 
 ### 配置 astute.yaml
 
+要想让您的 RHEL 服务器加入到正式到计算节点角色中，您首先得编辑```astute.yaml```文件，Puppet manifests 都在 **fuel-library** 中包含了。默认情况下，云平台的配置参数均是从 astute 服务取得的，所以在 Puppet manifests 下达之前，请编辑 ```astute.yaml```来满足您的配置需求，其位于```/etc```目录下，如果您还要部署额外的组件，如：Sahara、Murano、或者是 Ceilometer，您还必须更新 ```astute.yaml```的网络部分，要赋予网络正确的角色和参数。
 
+在[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#configure-the-astute-yaml-file-parameters)中，列出了详细的 ```astute.yaml```的配置参数，以下是一个在不同云环境中已经实际应用的例子的配置：
+ 
+ * [Neutron VXLAN 实例](https://review.fuel-infra.org/#/c/14377/19/pages/draft/rhel7-compute-guide/_examples/astute-tun-simple.yaml)
+ * [基于Bonding的 Neutron VXLAN](https://review.fuel-infra.org/#/c/14377/19/pages/draft/rhel7-compute-guide/_examples/astute-vlan-bond.yaml)
+ * [基于DVR的 Neutron VXLAN](https://review.fuel-infra.org/#/c/14377/19/pages/draft/rhel7-compute-guide/_examples/astute-tun-dvr.yaml)
 
 ### 在 RHEL 节点中应用 puppet manifests
 
@@ -124,8 +130,7 @@ RHEL 计算节点的部署流程，可以归结为在RHEL的节点上以特定�
 | /ceilometer/compute.pp |（可选）如果你部署了Ceilometer，在RHEL计算节点上接受Ceilometer的配置，另外，不要接受此Minifests。   | /etc/puppet/modules/osnailyfacter/modular/ceilometer/compute.pp |
 |/ceph/ceph_compute.pp  |（可选）如果你部署了Ceph，在RHEL计算节点接受Ceph 的配置。另外，不要接受此Minifests。   | /etc/puppet/modules/osnailyfacter/modular/ceph/ceph_compute.pp |
 
-请参考[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#deploy-the-rhel-compute-nodes)，列出了特殊的命令行，对于在RHEL节点上配置OpenStakck服务和接受manifests非常的有帮助。
-
+请参考[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#deploy-the-rhel-compute-nodes)，列出了特殊的命令行，对于在RHEL节点上配置OpenStack 服务和接受 manifests 非常的有帮助。
 
 ## 验证部署好的 RHEL 节点
 
@@ -133,13 +138,21 @@ RHEL 计算节点的部署流程，可以归结为在RHEL的节点上以特定�
 
 | 验证 | 需求 | 
 | ------------ | ------------- | 
-|验证OpenStack的服务 |   | 
-| |   | 
-| |   | 
-| |   | 
-| |   | 
-
+|验证OpenStack的服务 | * 在控制器节点中查看：RHEL 计算节点是出于运行状态，且在 Nova hypervisor 列表中是启用的。 * RHEL 计算节点上的 nova-compute 服务是启动着的，且在 Nova 服务列表中是启用的。 * 在 neutron 代理列表中 OVS agent 的状态是 ```alive```  | 
+|验证在 RHEL 计算节点上启动虚拟机实例 | 在启动之后，命令 ```nova list```所返回的信息中对于刚刚创建的实例必须是：＊状态栏必须是```ACTIVE```＊ 电源栏必须是```Running```. 命令```nova show```所返回的实例所在主机信息必须有：＊ OS-EXT-SRV-ATTR:host ＊OS-EXT-SRV-ATTR:hypervisor_hostname  | 
+| 验证在不分配浮动IP的情况下虚拟机实例的网络互通| 执行下面的动作是成功的：＊ ping 实例的 internal IP 地址。＊在控制节点和 internal IP地址的实例之间建立TCP连接。  | 
+|验证在分配浮动IP的情况下虚拟机实例的网络互通 | 执行下面的动作是成功的：＊ 实例的floating ip是可以ping通的。＊在控制节点和 floating IP地址的实例之间建立TCP连接。 ＊在实例中可以访问互联网。  | 
+|验证实例可以访问元数据 |实例必须能够获取到元数据，如公钥。   | 
 
 ## 根据负载调度分离 RHEL 节点
 
+您现在终于有机会展现一下了，您刚刚将 RHEL 的节点加入到 MOS 云平台当中，可以将它们供用户使用了，从而实现用户运行负载到RHEL之上。主机聚合和可用域均是 OpenStack 为不同负载提供不同的访问方式的方式，[解决方案指南](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html#segregate-the-rhel-compute-nodes-from-the-ubuntu-nodes)给出了一些实例，来告诉您如何去使用它们。
+
 ## 接下来做什么？ 
+
+现在我们成功的实现了在 MOS 环境中运行 RHEL 计算节点，这也就意味着可以管理多个基于KVM hypervisor 的类型，有的来自 Ubuntu、有的来自 RHEL。这引起了我们更进一步的思考，未来方向有：
+
+  * 通过 Fuel 来实现，将非Ubuntu的计算节点部署到MOS环境中，且是自动化的集成流程。
+  * 引入支持额外的计算主机操作系统选项：比如Oracle Linux, CentOS, openSuSE等。
+
+如果此文引起了您的极大兴趣，请随时查看我们[完整的文档](https://docs.mirantis.com/openstack/fuel/fuel-master/rhel.html)。
