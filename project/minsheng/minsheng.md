@@ -907,6 +907,202 @@ sh -x /usr/lib/ocf/resource.d/fuel/mysql-wss start;echo $?
 ```
 报的错误是```mysql-wss: line 342: TMP: bad array subscript```
 
+```INFO: skipping node node-x.domain.tld as it is not eligible for running the resource .Its score is NULL```
+
+15:30 锡文、亚光以及我，均打算放弃这个环境了。但是用户不想放弃。
+
+16:00 赵永杰使用蛮力，将pacemaker的MySQL启动起来。```crm configure edit``` 
+
+16:20 邓锡文说，neutron.conf 中的api_worker是不可以随意乱改的，fuel部署完成之后的设置就是最佳的，是根据硬件的性能计算出来的。所以不要轻易的改动。
+
+16:28 还好，有个工作的好习惯，neutron.conf，nova.conf都有最原始的配置文件。锡文将它们都改了回来。尤其是api_worker这个配置项。 重启每个控制节点上的Neutron服务。
+
+16:30 实例nova list 没有结果。锡文继续回退原来的配置。
+
+16:48 锡文重启pacemaker，失败。
+
+17:00 用户询问明天能否测试高可用等。现在我们心里仍然没谱。那么硬件工程师的约定就只有明天再说吧。
+
+17:35 锡文接着restart pacemaker的服务。
+
+ ```crm node clearstate node-x``` 
+ ```servicie corosync restart && service pacemaker restart```
+18:25 
+```cibadmin --query >xx.xml```
+
+手动任意更改一个mysql-wss资源的score：300
+
+```cibadmin --replace --xml-file xx.xml```
+
+重启pacemaker服务。again。
+
+18:35 锡文决定放弃。毫无头绪，一如我昨天的状态，心情非常的沮丧。需要安慰！
+
+18:46 开始准备重新安装后快速恢复测试项的必要工具。
+
+19:00 赵永杰尝试再次启动哪怕是一个节点的MySQL服务。无果。
+
+19:35 将原来的环境reset。确认实例镜像、脚本等都有备份。
+
+20:00 开始执行部署。更改了public的IP地址范围。
+
+## 8.12 记录
+
+### 计划
+
+1. 制作镜像suse，先做一个，导出snapshot，然后基于此snapshot做120台实例。
+2. 检查一些系统的配额限制。
+
+
+10:00 部署OpenStack成功。开始制作glance image。
+
+10:20 开始创建实例：120 ，这次使用的是命令行：
+
+```
+nova boot --nic net-id=`neutron net-list` --image `glance image-list` --num-instances 120 <instance name>
+```
+只能创建25个实例。嗯，需要修改一些系统默认的Quota。
+
+```
+vcpu = 100 -> 130
+instances = 100 ->200
+floating-ip = 50 -> 150
+port = 50 -> 150 
+memory ＝ 51200 －> 5120000
+#secuity group = 10 -> 20
+
+```
+10:37 张希尧对于Fuel8.0的批处理功能，很不满意。我的建议是升级到Fuel 9.0 ，运维功能是他们更为看重的。
+
+确认删除。
+
+``` 
+for i in 'nova list|aws `/ACTIVE/Print$2`';do nova delete $i; done
+````
+
+11:12 锡文，确认是租户的Quota生效了。放弃整个系统的变更。
+  ```idenity -> project -> 右键Modify Qutoas```
+
+11:20 锡文说创建实例有一些慢。和百联的项目比起来差很多。
+
+11:23 创建了101个实例之后，剩下的实例无法正常running，依然报```Failed to allocate the network(s),net rescheduling.```锡文接着更改系统的Quota到预设值。Again
+
+12:30 锡文关掉了所有OpenStack服务的Debug日志。
+
+12:50 修改nova.conf的vif选项，重启nova-*的服务。 注意是所有的计算节点更改此参数。
+
+14:10 终于测试一次性启动120台实例成功。
+
+14:28 锡文不想那么的将问题绕过去，于是改回
+
+```
+vif_plugging_is_fatal=True
+vif_plugging_timeout=600
+```
+
+然后看下效果：
+
+14:30 制作SuSE的镜像。上传fio、iperf、clush工具等，以及测试的脚本。
+
+14:50 基于上面制作的snapshot来创建120台实例。 成功！
+
+14:55 开始测试用例：again
+
+
+15:10 实例启动之后，是ping不通的。网络是有问题的。开始Troubleshooting。
+
+16:40 一直在调试port是down的状态。主要是纠结
+
+```
+vif_plugging_is_fatal=True
+vif_plugging_timeout=600
+```
+
+将超时改为900，错误依旧。实例都创建不成功。
+
+17:00 改回
+```
+vif_plugging_is_fatal=False
+vif_plugging_timeout=0
+```
+
+17:35 修改控制节点上的neutron的worker等：
+
+neutron.conf
+```
+api_wokrers =30 ->100
+rpc_workers =30 ->100
+rpc_response_timeout=60 -> 120
+```
+
+metadata_agent.ini
+```
+metadata_workers= 40 -> 80
+```
+
+然后执行```crm resource restart p_neutron-metadata-agent```,再分别在各控制节点执行：```service neutron-server restart```
+
+17:45 创建120个实例。可以创建实例。但是port依然处于Down状态。
+
+18:00 锡文等意思是将修改过的配置都回退到最原始的状态。好吧。那就回退到原来的状态。
+
+18:20 将所有的参数修改回早上的状态，然后开始再走一遍。希望能够找到网络分配不了的原因所在。
+
+18:34 锡文想到可能是由于镜像格式的问题。原来在诸如百联的项目中使用的都是raw，而我们现在使用的qcow2格式的。包括TestVM这个MOS原生的镜像。
+
+18:38 民生的审计，堡垒机超时，无法继续使用。这边的人员已经下班。只能等到下周一再进行验证了。
+
+## 8.15 
+
+周末准备好将qcow2的文件转化为raw再试一次，将问题搞明白了。
+周一先将高可用的case过了。将此问题往后顺延。
+
+
+
+| 测试项 | 测试结果 | 备注|
+| ------------ | ------------- | ------------ |
+| 批量创建、删除120台虚拟机 | pass  |  |
+| 虚拟机在线迁移 | pass  | ping操作是不会中断的。|
+| 使用非DHCP方式注入IP | failed  | not supported |
+|无插件支持web VNC登录  | pass  |  |
+| 支持自定义导入模板 |  Pass | 先做这个。```glance image-create``` |
+|性能监控  | pass  | 服务器和实例 |
+|修改虚拟机配置  |  pass |直接测试的是在线修改配置。  |
+| Linux openssh密钥注入 | pass  |  |
+|重置操作系统管理员密码  | pass  |  |
+| 是否有SDK及命令行工具 | 有  | openstack、nova等 |
+| 用户管理 |  支持 |  |
+|windows虚拟机是否安装virt-io驱动  | pass  |  |
+| 整个云平台资源展现 | pass  |  |
+|单个物理机使用资源状况展现  | pass  |  |
+|总可用容量  | pass  |  |
+| 存储冗余度 |  pass | ceph 计算公式 |
+|使用FIO进行4k随机50%读、50%写测试120个虚拟机性能  | 详见录屏及生成的报告  |  |
+| 创建120×16个10G云硬盘，分别挂载在120个虚拟机，格式化成ext4文件系统，然后卸载 | pass  |  |
+|使用上述120×16个10G云硬盘，每个上面做32个快照，然后删除  |   |  执行```cinder snapshot-list```|
+| 删除上述创建的云硬盘 |   |  |
+|对虚拟机系统盘和云硬盘进行限速，保证SLA  | pass  |  |
+|测试同一物理节点内部及跨节点的网络传输效率  | 详见录屏信息。  | 同台和不同主机之间的网速非常的不一样。 |
+|支持http、sock端口的负载均衡，可以动态增加删除member，调整member权重  | pass  |  |
+|支持虚拟机动态加载浮动IP地址。  |  pass |  |
+|测试抓取任意虚机任意端口流量并保存为文件供后续分析  | pass  |  |
+| 服务器硬件状态监控 | 部分支持  |  |
+|服务器硬件资源使用率监控  | 支持  |  |
+| 服务器硬件资源使用率超阈值告警 |  另行测试 |  |
+|云管理平台组件工作状态监控告警  |  另行测试 |  |
+| 分布式存储组件工作状态监控告警 |  另行测试 |  |
+|SSD硬盘故障  |   |  |
+|SATA硬盘故障  |   |  |
+|计算节点断电  |   |  |
+|网络节点断电  |   |  |
+|控制节点断电  |   |  |
+|计算节点服务器网线拔出  |   |  |
+|  |   |  |
+|  |   |  |
+|  |   |  |
+
+  
+
 # 总结
 
 一、时间耗费及测试扣分项
@@ -922,6 +1118,7 @@ sh -x /usr/lib/ocf/resource.d/fuel/mysql-wss start;echo $?
 1. 不要同时支持多个项目，到最后哪个都支持不好。
 2. 遇到官僚机构，技术本身相比沟通显得微不足道。
 3. 对于OpenStack在实际中的PoC经验不足，面对用户的冥顽不化，拒绝学习／沟通的态度有些措手不及。
+4. OpenStack 是需要一个团队作战的，知识面涉及太广，个人很难全部掌握。
 
 三、团队建议
 
