@@ -81,6 +81,7 @@ OpenStack 是唯一一个支持混合裸金属和 Hypervisor 环境的解决方�
 ### 半个机架的概念验证的完成，仅花了$125,000,相比而言，原先的系统要花$1,500,000
 
 
+
 最终的部署规划分为三个阶段：
 
 * 阶段一、以一个机架十台计算节点，48T块存储，72TB的对象存储，构建基本的大数据分析平台，移植原有的应用。
@@ -89,7 +90,7 @@ OpenStack 是唯一一个支持混合裸金属和 Hypervisor 环境的解决方�
 
 ## 来自实践的洞见
 
-
+![](https://github.com/lijiangsheng1/work_for_umcloud/blob/master/market/openstack_bigdata_change.png?raw=true)
 
 ### 组织的变化
 
