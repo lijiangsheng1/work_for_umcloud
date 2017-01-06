@@ -4,7 +4,7 @@
 
 * 文档目录输出：
 
-![](file:///home/lee/Pictures/confluence-tree.png)
+![](https://img1.doubanio.com/view/photo/large/public/p2410299248.jpg)
 
 * Google Driver 迁移：
 
@@ -15,6 +15,9 @@
   * [面向企业基层经理、一线干部框架](http://106.75.154.2/download/attachments/2720281/UMCLOUD－general-Manager.pptx?api=v2) 李建盛
   * [面向基层技术人员框架](http://106.75.154.2/download/attachments/2720281/UMCLOUD－general-systemadmin.pptx?api=v2) 李建盛
 
+* 案例撰写框架输出：
+  * [用户案例思路框架](http://106.75.154.2:8090/download/attachments/2720281/案例写作框架.pptx?api=v2) 黄金法 （李建盛整理）
+
 * 面向中高层演示文稿输出分工细节：
   * [Why IAAS?](http://106.75.154.2/download/attachments/2720281/Why%20IAAS%20V1.0.pptx?api=v2) 宁鹏
   * [为什么是私有云？](http://106.75.154.2/download/attachments/2720281/Why%20private%20cloud.pptx?api=v2)  宁辉
@@ -23,7 +26,7 @@
   * [云战略合作伙伴之无锁定](http://106.75.154.2/download/attachments/2720281/云战略合作伙伴之无锁定.pptx?api=v2) 李建盛
 
 * 面向中高层演示文稿输出最终：
-  * [Mirantis OpenStack - 您云战略的最佳合作伙伴]() 李建盛
+  * [Mirantis OpenStack - 您云战略的最佳合作伙伴](http://106.75.154.2:8090/download/attachments/2720281/UMCLOUD-zhonggaoceng.pptx?api=v2) 李建盛 整理
 
 * 典型行业案例细化分析输出：
 
@@ -55,5 +58,11 @@
 
 * 各个分工
   * HRBP 积极的推进、会议组织
-  * BR 积极响应，并记录会议
+  * BR 积极响应，并记录会议纪要
   * 售前 在繁忙的工作之余，仍然坚持撰写材料。
+
+## 下一步工作纲领
+
+* 培训、引导大家使用协作平台——confluence，增强彼此的沟通和熟悉
+* 以实际案例进行更加深入的挖掘和探讨。以OpenStack组件和技术架构为引子，以现有案例为导向，进行深度整合。不仅提高售前工程师整体的技能水平，也帮助用户进一步理解OpenStack。
+* 积极响应HRBP的推进和信任。
